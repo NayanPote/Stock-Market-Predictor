@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stock Prediction</title>
+	<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4; /* Light background color */
+            color: #333; /* Text color */
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            background-color: #fff; /* Container background color */
+            text-align: center;
+        }
+        h1 {
+            margin-bottom: 20px;
+            color: #333;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #333;
+        }
+        input[type="text"],
+        input[type="date"] {
+            width: calc(50% - 10px);
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+            background-color: #f9f9f9; /* Input background color */
+            color: #333; /* Input text color */
+        }
+        input[type="text"]:focus,
+        input[type="date"]:focus {
+            border-color: #007bff;
+            outline: none;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #chartContainer {
+            margin-top: 30px;
+        }
+        footer {
+            background-color: #f4f4f4;
+            color: #333;
+            padding: 20px 0;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .footer-content p {
+            margin: 0;
+        }
+
+        .contact-info {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="contact-info">Contact: <a href="mailto:nayan.pote65@gmail.com">nayan.pote65@gmail.com</a></div>
+        <h1>Stock Prediction</h1>
+        <form id="stockForm" action="/predict" method="post">
+            <div class="form-group">
+                <label for="stockSymbol">Enter Stock Symbol:</label>
+                <input type="text" id="stockSymbol" name="stockSymbol" placeholder="e.g., AAPL">
+            </div>
+            <button type="submit">Predict</button>
+        </form>
+        <div id="chartContainer">
+            <!-- Chart will be displayed here -->
+        </div>
+    </div>
+
+    <footer>
+        <div class="footer-content">
+            <p>&copy; 2024 Nayan Pote. All rights reserved worldwide. The content, design, and proprietary algorithms contained on this website are the exclusive property of Nayan Pote. Unauthorized use is prohibited without prior written permission from Nayan Pote.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.getElementById('stockForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            const stockSymbol = document.getElementById('stockSymbol').value.toUpperCase();
+            fetchStockData(stockSymbol);
+        });
+
+        function fetchStockData(stockSymbol) {
+            fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${stockSymbol}`)
+                .then(response => response.json())
+                .then(data => {
+                    const chartData = {
+                        labels: data.chart.result[0].timestamp.map(timestamp => new Date(timestamp * 1000).toLocaleDateString()),
+                        datasets: [{
+                            label: `${stockSymbol} Stock Price`,
+                            data: data.chart.result[0].indicators.quote[0].close,
+                            borderColor: '#007bff',
+                            backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                            borderWidth: 1
+                        }]
+                    };
+
+                    renderChart(chartData);
+                })
+                .catch(error => console.error('Error fetching stock data:', error));
+        }
+
+        function renderChart(chartData) {
+            const ctx = document.getElementById('chart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: chartData,
+                options: {
+                    scales: {
+                        xAxes: [{
+                            type: 'time',
+                            time: {
+                                unit: 'day'
+                            }
+                        }],
+                        yAxes: [{
+                            scaleLabel: {
+                                display: true,
+                                labelString: 'Stock Price (USD)'
+                            }
+                        }]
+                    }
+                }
+            });
+        }
+    </script>
+
+		 <canvas id="stockChart" width="800" height="400"></canvas>
+
+    <script>
+        // Sample data (replace with your own data)
+        const labels = ["January", "February", "March", "April", "May", "June", "July"];
+        const prices = [100, 120, 110, 130, 125, 140, 135];
+
+        const ctx = document.getElementById('stockChart').getContext('2d');
+
+        const chart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: 'Stock Price',
+                    data: prices,
+                    backgroundColor: [], // Empty array to set background color dynamically
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                scales: {
+                    yAxes: [{
+                        ticks: {
+                            beginAtZero: false
+                        }
+                    }]
+                }
+            }
+        });
+
+        // Set background color dynamically based on price movement
+        chart.data.datasets[0].backgroundColor = prices.map((price, index) => {
+            if (index > 0) {
+                return price >= prices[index - 1] ? 'rgba(0, 255, 0, 0.5)' : 'rgba(255, 0, 0, 0.5)';
+            } else {
+                return 'rgba(0, 255, 0, 0.5)'; // Assuming the first price as green
+            }
+        });
+
+        chart.update();
+    </script>
+
+		<script>
+    document.getElementById('stockForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const stockSymbol = document.getElementById('stockSymbol').value.toUpperCase();
+        fetchStockData(stockSymbol);
+    });
+
+    function fetchStockData(stockSymbol) {
+        fetch(`https://query1.finance.yahoo.com/v8/finance/chart/${stockSymbol}`)
+            .then(response => response.json())
+            .then(data => {
+                const chartData = {
+                    labels: data.chart.result[0].timestamp.map(timestamp => new Date(timestamp * 1000).toLocaleDateString()),
+                    datasets: [{
+                        label: `${stockSymbol} Stock Price`,
+                        data: data.chart.result[0].indicators.quote[0].close,
+                        borderColor: '#007bff',
+                        backgroundColor: 'rgba(0, 123, 255, 0.1)',
+                        borderWidth: 1
+                    }]
+                };
+
+                renderChart(chartData);
+                // Redirect to predict_result.html with input data
+                window.location.href = `/predict_result.html?stockSymbol=${stockSymbol}`;
+            })
+            .catch(error => console.error('Error fetching stock data:', error));
+    }
+
+    function renderChart(chartData) {
+        const ctx = document.getElementById('chart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: chartData,
+            options: {
+                scales: {
+                    xAxes: [{
+                        type: 'time',
+                        time: {
+                            unit: 'day'
+                        }
+                    }],
+                    yAxes: [{
+                        scaleLabel: {
+                            display: true,
+                            labelString: 'Stock Price (USD)'
+                        }
+                    }]
+                }
+            }
+        });
+    }
+</script>
+
+</body>
+</html>
